@@ -40,3 +40,33 @@ export async function checkHealth({ signal } = {}) {
     clearTimeout(timeout);
   }
 }
+
+async function getJson(path, { signal } = {}) {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    signal,
+  });
+  if (!response.ok) {
+    throw new Error(`GET ${path} failed with status ${response.status}`);
+  }
+  return response.json();
+}
+
+export async function getProjects({ signal } = {}) {
+  const data = await getJson("/api/projects", { signal });
+  return Array.isArray(data) ? data : data.projects || [];
+}
+
+export async function getProject(id, { signal } = {}) {
+  return getJson(`/api/projects/${encodeURIComponent(id)}`, { signal });
+}
+
+export async function getAlerts({ signal } = {}) {
+  const data = await getJson("/api/alerts", { signal });
+  return Array.isArray(data) ? data : data.alerts || [];
+}
+
+export async function getAnalytics({ signal } = {}) {
+  return getJson("/api/analytics", { signal });
+}

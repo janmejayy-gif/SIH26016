@@ -81,7 +81,7 @@ export default function Sidebar({ open, onClose }) {
           ))}
         </nav>
 
-        <div className="sidebar-footer">V0.1.0 · PHASE 1 BUILD</div>
+        <div className="sidebar-footer">V0.2.0 · PHASE 2 BUILD</div>
       </aside>
     </>
   );

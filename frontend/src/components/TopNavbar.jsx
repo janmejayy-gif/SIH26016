@@ -1,5 +1,8 @@
+import { useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { Bell, ChevronRight, Menu, Search } from "lucide-react";
+import { Bell, ChevronRight, Menu, Search, X } from "lucide-react";
+import RiskBadge from "./RiskBadge.jsx";
+import { searchProjects } from "../utils/projectUtils.js";
 
 const ROUTE_LABELS = {
   "/dashboard": "Dashboard",
@@ -11,9 +14,20 @@ const ROUTE_LABELS = {
   "/settings": "Settings",
 };
 
-export default function TopNavbar({ apiOnline, onMenuClick }) {
+export default function TopNavbar({ apiOnline, onMenuClick, onOpenProject }) {
   const { pathname } = useLocation();
   const currentLabel = ROUTE_LABELS[pathname] || "Dashboard";
+  const [query, setQuery] = useState("");
+  const [focused, setFocused] = useState(false);
+
+  const results = useMemo(() => searchProjects(query).slice(0, 6), [query]);
+  const showDropdown = focused && query.trim().length > 0;
+
+  const selectProject = (id) => {
+    setQuery("");
+    setFocused(false);
+    if (onOpenProject) onOpenProject(id);
+  };
 
   return (
     <header className="topnavbar">
@@ -37,17 +51,56 @@ export default function TopNavbar({ apiOnline, onMenuClick }) {
           role="status"
         >
           <span className="status-dot" aria-hidden="true" />
-          <span className="status-text">{apiOnline ? "API Online" : "API Offline"}</span>
+          <span className="status-text">
+            {apiOnline ? "API Online" : "API Offline"}
+          </span>
         </div>
 
-        <label className="navbar-search">
+        <div className="navbar-search">
           <Search size={15} aria-hidden="true" />
           <input
-            type="search"
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
             placeholder="Search projects, districts..."
             aria-label="Search projects and districts"
+            autoComplete="off"
           />
-        </label>
+          {query && (
+            <button
+              className="search-clear"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => setQuery("")}
+              aria-label="Clear search"
+            >
+              <X size={13} />
+            </button>
+          )}
+          {showDropdown && (
+            <div className="search-dropdown card">
+              {results.length === 0 ? (
+                <div className="search-empty">No matching projects found.</div>
+              ) : (
+                results.map((project) => (
+                  <button
+                    key={project.id}
+                    className="search-result"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => selectProject(project.id)}
+                  >
+                    <span className="search-result-name">{project.name}</span>
+                    <span className="search-result-meta">
+                      {project.id} · {project.district}, {project.state}
+                    </span>
+                    <RiskBadge level={project.risk} />
+                  </button>
+                ))
+              )}
+            </div>
+          )}
+        </div>
 
         <button className="icon-btn" aria-label="Notifications (5 unread)">
           <Bell size={18} />

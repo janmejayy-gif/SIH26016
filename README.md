@@ -106,9 +106,13 @@ npm run preview    # optional: serve the production build locally
 
 ## API Endpoints
 
-| Method | Path         | Description                        |
-| ------ | ------------ | ---------------------------------- |
-| GET    | `/api/health`| Service health + server timestamp  |
+| Method | Path                 | Description                                    |
+| ------ | -------------------- | ---------------------------------------------- |
+| GET    | `/api/health`        | Service health + server timestamp              |
+| GET    | `/api/projects`      | Mock project register (`?state=&risk=&q=`)     |
+| GET    | `/api/projects/:id`  | Single mock project (404 if unknown)           |
+| GET    | `/api/alerts`        | Mock early-warning alerts                      |
+| GET    | `/api/analytics`     | Mock portfolio aggregates                      |
 
 ## Notes
 

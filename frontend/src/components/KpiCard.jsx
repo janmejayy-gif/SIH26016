@@ -1,6 +1,16 @@
-export default function KpiCard({ icon: Icon, label, value, support, progress, tone = "blue" }) {
-  return (
-    <article className={`card kpi-card tone-${tone}`}>
+import { Link } from "react-router-dom";
+
+export default function KpiCard({
+  icon: Icon,
+  label,
+  value,
+  support,
+  progress,
+  tone = "blue",
+  to,
+}) {
+  const body = (
+    <>
       <div className="kpi-top">
         <span className="kpi-label">{label}</span>
         {Icon && (
@@ -19,8 +29,23 @@ export default function KpiCard({ icon: Icon, label, value, support, progress, t
         aria-valuemax={100}
         aria-label={`${label} indicator`}
       >
-        <div className="kpi-bar-fill" style={{ width: `${Math.min(progress, 100)}%` }} />
+        <div
+          className="kpi-bar-fill"
+          style={{ width: `${Math.min(progress, 100)}%` }}
+        />
       </div>
-    </article>
+    </>
+  );
+
+  if (to) {
+    return (
+      <Link to={to} className={`card kpi-card kpi-link tone-${tone}`}>
+        {body}
+      </Link>
+    );
+  }
+
+  return (
+    <article className={`card kpi-card tone-${tone}`}>{body}</article>
   );
 }
