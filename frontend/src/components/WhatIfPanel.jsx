@@ -38,8 +38,8 @@ export default function WhatIfPanel({ onSimulationChange }) {
         levels.environmentalClearance * FACTOR_WEIGHTS.environmentalClearance) /
         100
     );
-    const level = riskLevel >= 75 ? "Critical" : riskLevel >= 50 ? "High" : riskLevel >= 25 ? "Medium" : "Low";
-    const delayDays = predictDelayDays(riskScore, "Under Review"); // status placeholder
+    const level = getRiskLevel(score);
+    const delayDays = predictDelayDays(score, "Under Review");
     return { score, level, delayDays };
   }, [levels]);
 

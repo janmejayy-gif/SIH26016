@@ -267,169 +267,46 @@ export default function Analytics() {
           </div>
         </ChartCard>
 
-        <ChartCard
-          title="Predicted vs Current Risk"
-          subtitle="Portfolio-level comparison: recorded vs predicted risk"
-        >
-          <div className="trend-body">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stateDelayRisk} margin={{ top: 8, right: 8, left: -14, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#eef2f7" vertical={false} />
-                <XAxis
-                  dataKey="short"
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fill: "#5c7089", fontSize: 12 }}
-                  dy={6}
-                />
-                <YAxis
-                  domain={[0, 80]}
-                  tickFormatter={(v) => `${v}%`}
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fill: "#8aa0b8", fontSize: 12 }}
-                />
-                <Tooltip
-                  formatter={(value, _name, payload) => [
-                    `${value}%`,
-                    payload?.payload?.state || "State",
-                  ]}
-                  cursor={{ fill: "#f4f8fd" }}
-                  contentStyle={TOOLTIP_STYLE}
-                />
-                <Bar dataKey="risk" radius={[6, 6, 0, 0]} barSize={18} fill="#1d4ed8" >
-                  {stateDelayRisk.map((row) => (
-                    <Cell key={row.short} fill="#1d4ed8" />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </ChartCard>
-      </div>
-
-      <ChartCard
-        title="Risk Trend Over Time"
-        subtitle="Average predicted delay risk across monitored projects (Mar – Aug)"
+<ChartCard
+        title="Predicted vs Current Risk"
+        subtitle="Portfolio-level comparison: recorded vs predicted risk"
       >
         <div className="trend-body">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={delayTrend} margin={{ top: 6, right: 6, left: -18, bottom: 0 }}>
-              <defs>
-                <linearGradient id="analyticsTrendFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#1d4ed8" stopOpacity={0.18} />
-                  <stop offset="100%" stopColor="#1d4ed8" stopOpacity={0.02} />
-                </linearGradient>
-              </defs>
+            <BarChart data={stateDelayRisk} margin={{ top: 8, right: 8, left: -14, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#eef2f7" vertical={false} />
               <XAxis
-                dataKey="month"
+                dataKey="short"
                 tickLine={false}
                 axisLine={false}
                 tick={{ fill: "#5c7089", fontSize: 12 }}
                 dy={6}
               />
               <YAxis
-                domain={[45, 70]}
-                ticks={[45, 50, 55, 60, 65, 70]}
+                domain={[0, 80]}
                 tickFormatter={(v) => `${v}%`}
                 tickLine={false}
                 axisLine={false}
                 tick={{ fill: "#8aa0b8", fontSize: 12 }}
               />
-              <Tooltip {...trendTooltip} cursor={{ stroke: "#c7dbfc" }} />
-              <Area
-                type="monotone"
-                dataKey="risk"
-                stroke="#1d4ed8"
-                strokeWidth={2.5}
-                fill="url(#analyticsTrendFill)"
-                dot={{ r: 3, fill: "#1d4ed8", strokeWidth: 0 }}
-                activeDot={{ r: 5, fill: "#1a3fae", strokeWidth: 2, stroke: "#ffffff" }}
+              <Tooltip
+                formatter={(value, _name, payload) => [
+                  `${value}%`,
+                  payload?.payload?.state || "State",
+                ]}
+                cursor={{ fill: "#f4f8fd" }}
+                contentStyle={TOOLTIP_STYLE}
               />
-            </AreaChart>
+              <Bar dataKey="risk" radius={[6, 6, 0, 0]} barSize={18} fill="#1d4ed8" >
+                {stateDelayRisk.map((row) => (
+                  <Cell key={row.short} fill="#1d4ed8" />
+                ))}
+              </Bar>
+            </BarChart>
           </ResponsiveContainer>
         </div>
       </ChartCard>
-
-      <div className="charts-grid">
-        <ChartCard
-          title="Top Predictive Drivers"
-          subtitle="Most frequent top risk drivers across projects"
-        >
-          <div className="trend-body">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={predictiveDrivers}
-                layout="vertical"
-                margin={{ top: 4, right: 24, left: 8, bottom: 0 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#eef2f7" horizontal={false} />
-                <XAxis
-                  type="number"
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fill: "#8aa0b8", fontSize: 12 }}
-                />
-                <YAxis
-                  type="category"
-                  dataKey="factor"
-                  width={150}
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fill: "#33475e", fontSize: 12 }}
-                />
-                <Tooltip
-                  formatter={(value) => [`${value} projects`, "Frequency"]}
-                  cursor={{ fill: "#f4f8fd" }}
-                  contentStyle={TOOLTIP_STYLE}
-                />
-                <Bar dataKey="count" radius={[0, 6, 6, 0]} barSize={18} fill="#1d4ed8" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </ChartCard>
-
-        <ChartCard
-          title="Predicted vs Current Risk"
-          subtitle="Portfolio-level comparison: recorded vs predicted risk"
-        >
-          <div className="trend-body">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stateDelayRisk} margin={{ top: 8, right: 8, left: -14, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#eef2f7" vertical={false} />
-                <XAxis
-                  dataKey="short"
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fill: "#5c7089", fontSize: 12 }}
-                  dy={6}
-                />
-                <YAxis
-                  domain={[0, 80]}
-                  tickFormatter={(v) => `${v}%`}
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fill: "#8aa0b8", fontSize: 12 }}
-                />
-                <Tooltip
-                  formatter={(value, _name, payload) => [
-                    `${value}%`,
-                    payload?.payload?.state || "State",
-                  ]}
-                  cursor={{ fill: "#f4f8fd" }}
-                  contentStyle={TOOLTIP_STYLE}
-                />
-                <Bar dataKey="risk" radius={[6, 6, 0, 0]} barSize={18} fill="#1d4ed8" >
-                  {stateDelayRisk.map((row) => (
-                    <Cell key={row.short} fill="#1d4ed8" />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </ChartCard>
-      </div>
+    </div>
     </>
   );
 }
