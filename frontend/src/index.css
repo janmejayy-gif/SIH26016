@@ -2051,6 +2051,173 @@ button {
 }
 
 /* ==========================================================================
+   Notification Dropdown
+   ========================================================================== */
+
+.notification-wrapper {
+  position: relative;
+}
+
+.notification-bell {
+  position: relative;
+}
+
+.notification-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 380px;
+  max-width: 480px;
+  z-index: 100;
+  box-shadow: var(--shadow-md);
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.notification-header h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 0;
+}
+
+.notification-count {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.notification-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.notification-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  gap: 12px;
+}
+
+.notification-item:hover {
+  background: #f4f8fd;
+}
+
+.notification-item.unread {
+  background: #fefefe;
+}
+
+.notification-item.unread:hover {
+  background: #f0f5fa;
+}
+
+.notification-item.read {
+  opacity: 0.7;
+}
+
+.notification-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-header-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.notification-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy);
+  margin: 0;
+  flex: 1;
+}
+
+.notification-desc {
+  font-size: 12.5px;
+  color: var(--muted);
+  margin: 0 0 8px 28px;
+  line-height: 1.5;
+}
+
+.notification-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 8px 0 0 28px;
+  font-size: 11.5px;
+  color: var(--faint);
+}
+
+.notification-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.notification-action {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 8px 0 0 28px;
+  padding: 8px 12px;
+  background: #f6f9fd;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  line-height: 1.5;
+}
+
+.unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.notification-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  text-align: right;
+}
+
+.notification-footer .btn {
+  padding: 8px 16px;
+}
+
+/* Notification bell badge */
+.notification-bell .badge-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--red);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  border: 2px solid #ffffff;
+}
+
+/* ==========================================================================
    Phase 2 responsive
    ========================================================================== */
 

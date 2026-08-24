@@ -166,3 +166,25 @@ export function predictPortfolio(projects) {
     highProjects: highCount,
   };
 }
+
+/** Predict the portfolio-level summary including average expected delay. */
+export function predictPortfolioSummary(projects) {
+  const scores = projects.map(p => predictProjectRisk(p));
+  const avgScore = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+  const criticalCount = scores.filter(s => s >= 75).length;
+  const highCount = scores.filter(s => s >= 50 && s < 75).length;
+
+  // Compute average expected delay days
+  const avgDelay = Math.round(
+    projects.reduce((sum, p) => sum + predictDelayDays(predictProjectRisk(p), p.status || "Monitoring"), 0) /
+      projects.length
+  );
+
+  return {
+    averagePredictedRisk: avgScore,
+    criticalProjects: criticalCount,
+    highProjects: highCount,
+    totalProjects: projects.length,
+    averageExpectedDelayDays: avgDelay,
+  };
+}

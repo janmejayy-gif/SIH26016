@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Bell, ChevronRight, Menu, Search, X } from "lucide-react";
 import RiskBadge from "./RiskBadge.jsx";
+import NotificationDropdown from "./NotificationDropdown.jsx";
 import { searchProjects } from "../utils/projectUtils.js";
 
 const ROUTE_LABELS = {
@@ -102,10 +103,7 @@ export default function TopNavbar({ apiOnline, onMenuClick, onOpenProject }) {
           )}
         </div>
 
-        <button className="icon-btn" aria-label="Notifications (5 unread)">
-          <Bell size={18} />
-          <span className="badge-dot">5</span>
-        </button>
+        <NotificationDropdown onOpenProject={onOpenProject} />
 
         <div className="user-chip">
           <div className="avatar">AD</div>
