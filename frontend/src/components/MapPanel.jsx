@@ -1,84 +1,175 @@
+import { useEffect, useRef, useState, useMemo } from "react";
+import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 import { stateSummary } from "../data/dashboardData.js";
 import { riskColor } from "../utils/projectUtils.js";
+import { useOutletContext } from "react-router-dom";
 
-const MARKERS = [
-  { state: "Uttar Pradesh", x: 232, y: 142, label: "UP" },
-  { state: "Maharashtra", x: 138, y: 268, label: "MH" },
-  { state: "Rajasthan", x: 128, y: 116, label: "RJ" },
-  { state: "Madhya Pradesh", x: 178, y: 198, label: "MP" },
-  { state: "Bihar", x: 262, y: 158, label: "BR" },
-];
+function MapEvents({ onStateClick }) {
+  const map = useMap();
+  useEffect(() => {
+    map.on("click", () => onStateClick(null));
+    return () => map.off("click", () => onStateClick(null));
+  }, [map, onStateClick]);
+  return null;
+}
 
-const INDIA_PATH =
-  "M196,18 L206,34 L198,52 L212,64 L204,84 L226,92 L246,110 L258,104 L282,112 L306,108 L332,118 L362,112 L376,124 L392,142 L380,158 L356,152 L340,166 L318,162 L304,176 L310,192 L296,208 L302,232 L288,258 L270,286 L252,316 L238,348 L228,382 L216,414 L204,442 L192,452 L182,430 L172,398 L158,368 L146,336 L128,308 L116,282 L98,262 L82,244 L66,238 L52,222 L58,206 L74,210 L88,198 L78,180 L64,168 L58,148 L70,132 L86,122 L96,106 L112,92 L126,76 L138,60 L150,44 L164,30 Z";
+function StateLayer({ geojson, selectedState, onStateClick, riskData }) {
+  const style = (feature) => {
+    const stateName = feature.properties.NAME_1;
+    const summary = riskData.find((s) => s.state === stateName);
+    const tone = summary?.tone || "green";
+    const isSelected = selectedState === stateName;
+    return {
+      fillColor: riskColor(tone === "green" ? "Low" : tone === "amber" ? "Medium" : tone === "orange" ? "High" : "Critical"),
+      weight: isSelected ? 3 : 1.5,
+      opacity: 1,
+      color: isSelected ? "#1d4ed8" : "#ffffff",
+      fillOpacity: isSelected ? 0.7 : 0.5,
+      dashArray: "3",
+    };
+  };
+
+  const highlight = {
+    weight: 3,
+    color: "#1d4ed8",
+    fillOpacity: 0.8,
+    bringToFront: true,
+  };
+
+  const onEachFeature = (feature, layer) => {
+    const stateName = feature.properties.NAME_1;
+    layer.on({
+      click: (e) => {
+        e.originalEvent.stopPropagation();
+        onStateClick(stateName);
+      },
+      mouseover: (e) => {
+        const layer = e.target;
+        layer.setStyle(highlight);
+      },
+      mouseout: (e) => {
+        const layer = e.target;
+        layer.setStyle(style(feature));
+      },
+    });
+  };
+
+  return (
+    <GeoJSON
+      data={geojson}
+      style={style}
+      onEachFeature={onEachFeature}
+    />
+  );
+}
+
+function MapLegend() {
+  const map = useMap();
+  const legend = useRef(null);
+
+  useEffect(() => {
+    if (!legend.current) return;
+    const div = legend.current;
+    div.innerHTML = `
+      <div style="padding: 8px 12px; font-size: 12px; line-height: 1.5;">
+        <div style="font-weight: 600; margin-bottom: 6px; color: #10294b;">Risk Level</div>
+        <div style="display: flex; align-items: center; gap: 6px; margin: 3px 0;">
+          <span style="width: 14px; height: 14px; border-radius: 3px; background: #16a34a;"></span>
+          <span style="color: #33475e;">Low</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px; margin: 3px 0;">
+          <span style="width: 14px; height: 14px; border-radius: 3px; background: #d97706;"></span>
+          <span style="color: #33475e;">Medium</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px; margin: 3px 0;">
+          <span style="width: 14px; height: 14px; border-radius: 3px; background: #ea580c;"></span>
+          <span style="color: #33475e;">High</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px; margin: 3px 0;">
+          <span style="width: 14px; height: 14px; border-radius: 3px; background: #dc2626;"></span>
+          <span style="color: #33475e;">Critical</span>
+        </div>
+      </div>
+    `;
+    legend.current = div;
+  }, []);
+
+  return (
+    <div ref={legend} className="leaflet-control leaflet-bar" style={{ background: "white", padding: "0", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0,0,0,0.15)" }} />
+  );
+}
 
 export default function MapPanel({ selectedState, onSelectState }) {
-  return (
-    <div className="map-canvas card">
-      <svg
-        viewBox="0 0 420 470"
-        className="map-svg"
-        role="img"
-        aria-label="Stylised map of monitored states"
-      >
-        <path d={INDIA_PATH} fill="#eaf1fe" stroke="#c7dbfc" strokeWidth="1.5" />
-        {[70, 140, 210, 280, 350, 420].map((y) => (
-          <line key={y} x1="20" x2="400" y1={y} y2={y} stroke="#dbe7f5" strokeWidth="0.5" strokeDasharray="2 4" />
-        ))}
-        {[60, 130, 200, 270, 340].map((x) => (
-          <line key={x} y1="10" y2="460" x1={x} x2={x} stroke="#dbe7f5" strokeWidth="0.5" strokeDasharray="2 4" />
-        ))}
-        {MARKERS.map((marker) => {
-          const summary = stateSummary.find((s) => s.state === marker.state);
-          const selected = selectedState === marker.state;
-          return (
-            <g
-              key={marker.state}
-              className={`map-marker${selected ? " selected" : ""}`}
-              onClick={() => onSelectState(marker.state)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") onSelectState(marker.state);
-              }}
-              aria-label={`${marker.state}: ${summary ? summary.projects : 0} projects`}
-            >
-              {selected && (
-                <circle cx={marker.x} cy={marker.y} r="15" fill={riskColor(summary.tone === "green" ? "Low" : summary.tone === "amber" ? "Medium" : summary.tone === "orange" ? "High" : "Critical")} opacity="0.18" />
-              )}
-              <circle
-                cx={marker.x}
-                cy={marker.y}
-                r="9"
-                fill={riskColor(summary?.tone === "green" ? "Low" : summary?.tone === "amber" ? "Medium" : summary?.tone === "orange" ? "High" : "Critical")}
-                stroke="#ffffff"
-                strokeWidth="2.5"
-              />
-              <text
-                x={marker.x + 13}
-                y={marker.y - 8}
-                fontSize="11"
-                fontWeight="700"
-                fill="#10294b"
-              >
-                {marker.label}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
+  const { openProject } = useOutletContext();
+  const [geojson, setGeojson] = useState(null);
+  const [mapReady, setMapReady] = useState(false);
 
-      <div className="map-legend">
-        {["Low", "Medium", "High", "Critical"].map((level) => (
-          <span className="legend-item" key={level}>
-            <span
-              className="legend-swatch"
-              style={{ background: riskColor(level), borderRadius: "50%" }}
-              aria-hidden="true"
+  useEffect(() => {
+    fetch("/data/india-states.geojson")
+      .then((res) => res.json())
+      .then((data) => {
+        setGeojson(data);
+        setMapReady(true);
+      })
+      .catch((err) => {
+        console.error("Failed to load India states GeoJSON:", err);
+        setMapReady(true);
+      });
+  }, []);
+
+  const handleStateClick = (stateName) => {
+    if (stateName) {
+      onSelectState(stateName);
+    }
+  };
+
+  const selectedProject = useMemo(() => {
+    if (!selectedState) return null;
+    const projects = window.__LADI_PROJECTS__ || [];
+    const inState = projects.filter((p) => p.state === selectedState);
+    if (inState.length === 0) return null;
+    return [...inState].sort((a, b) => b.probability - a.probability)[0];
+  }, [selectedState]);
+
+  const summary = stateSummary.find((s) => s.state === selectedState);
+
+  if (!mapReady) {
+    return (
+      <div className="map-canvas card" style={{ minHeight: "400px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div className="placeholder-panel">
+          <h3>Loading map...</h3>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="map-canvas card" style={{ minHeight: "500px", position: "relative" }}>
+      <div style={{ position: "relative", width: "100%", height: "480px", overflow: "hidden" }}>
+        <MapContainer
+          center={[22.5, 80]}
+          zoom={4.5}
+          minZoom={4}
+          maxZoom={8}
+          scrollWheelZoom={true}
+          style={{ height: "100%", width: "100%" }}
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          {geojson && (
+            <StateLayer
+              geojson={geojson}
+              selectedState={selectedState}
+              onStateClick={handleStateClick}
+              riskData={stateSummary}
             />
-            {level}
-          </span>
-        ))}
+          )}
+          <MapEvents onStateClick={handleStateClick} />
+          <MapLegend />
+        </MapContainer>
       </div>
     </div>
   );

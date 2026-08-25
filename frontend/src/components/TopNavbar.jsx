@@ -15,7 +15,7 @@ const ROUTE_LABELS = {
   "/settings": "Settings",
 };
 
-export default function TopNavbar({ apiOnline, onMenuClick, onOpenProject }) {
+export default function TopNavbar({ apiOnline, onMenuClick, onOpenProject, userName, userRole, userInitials }) {
   const { pathname } = useLocation();
   const currentLabel = ROUTE_LABELS[pathname] || "Dashboard";
   const [query, setQuery] = useState("");
@@ -106,10 +106,10 @@ export default function TopNavbar({ apiOnline, onMenuClick, onOpenProject }) {
         <NotificationDropdown onOpenProject={onOpenProject} />
 
         <div className="user-chip">
-          <div className="avatar">AD</div>
+          <div className="avatar">{userInitials}</div>
           <div className="user-meta">
-            <div className="user-name">A. Deshmukh</div>
-            <div className="user-role">Acquisition Officer</div>
+            <div className="user-name">{userName}</div>
+            <div className="user-role">{userRole}</div>
           </div>
         </div>
       </div>

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import PageHeader from "../components/PageHeader.jsx";
 import SectionHeader from "../components/SectionHeader.jsx";
+import { useProfile } from "../context/ProfileContext.jsx";
+import { useTheme } from "../context/ThemeContext.jsx";
 
 const INITIAL_SETTINGS = [
   {
@@ -28,6 +30,11 @@ const INITIAL_SETTINGS = [
 
 export default function Settings() {
   const [settings, setSettings] = useState(INITIAL_SETTINGS);
+  const { profile, updateProfile, saveMessage } = useProfile();
+  const { theme, toggleTheme } = useTheme();
+  const [officerName, setOfficerName] = useState(profile.name);
+  const [deptName, setDeptName] = useState(profile.department);
+  const [designation, setDesignation] = useState(profile.role);
 
   useEffect(() => {
     document.title = "Settings · LADI Portal";
@@ -37,6 +44,10 @@ export default function Settings() {
     setSettings((prev) =>
       prev.map((s) => (s.id === id ? { ...s, enabled: !s.enabled } : s))
     );
+
+  const handleSave = () => {
+    updateProfile({ name: officerName, department: deptName, role: designation });
+  };
 
   return (
     <>
@@ -70,6 +81,26 @@ export default function Settings() {
       </div>
 
       <SectionHeader
+        title="Appearance"
+        subtitle="Choose your preferred color theme"
+      />
+      <div className="card card-pad">
+        <div className="setting-row">
+          <div>
+            <div className="setting-name">Theme</div>
+            <p className="setting-desc">Switch between light and dark mode</p>
+          </div>
+          <button
+            className={`switch${theme === "dark" ? " on" : ""}`}
+            onClick={toggleTheme}
+            role="switch"
+            aria-checked={theme === "dark"}
+            aria-label="Toggle dark mode"
+          />
+        </div>
+      </div>
+
+      <SectionHeader
         title="Profile"
         subtitle="Displayed identity within the LADI Portal"
       />
@@ -79,7 +110,24 @@ export default function Settings() {
             <div className="setting-name">Officer</div>
             <p className="setting-desc">A. Deshmukh · Acquisition Officer</p>
           </div>
-          <input className="text-input" defaultValue="A. Deshmukh" aria-label="Officer name" />
+          <input
+            className="text-input"
+            value={officerName}
+            onChange={(e) => setOfficerName(e.target.value)}
+            aria-label="Officer name"
+          />
+        </div>
+        <div className="setting-row">
+          <div>
+            <div className="setting-name">Designation</div>
+            <p className="setting-desc">Role displayed in the portal header</p>
+          </div>
+          <input
+            className="text-input"
+            value={designation}
+            onChange={(e) => setDesignation(e.target.value)}
+            aria-label="Designation"
+          />
         </div>
         <div className="setting-row">
           <div>
@@ -90,14 +138,22 @@ export default function Settings() {
           </div>
           <input
             className="text-input"
-            defaultValue="DoLR, MoRD"
+            value={deptName}
+            onChange={(e) => setDeptName(e.target.value)}
             aria-label="Department"
           />
         </div>
       </div>
 
       <div>
-        <button className="btn btn-primary">Save Preferences</button>
+        <button className="btn btn-primary" onClick={handleSave}>
+          Save Changes
+        </button>
+        {saveMessage && (
+          <span className="save-confirmation" style={{ marginLeft: "12px", color: "var(--green)", fontSize: "13px", fontWeight: 500 }}>
+            {saveMessage}
+          </span>
+        )}
       </div>
     </>
   );

@@ -4,8 +4,10 @@ import Sidebar from "../components/Sidebar.jsx";
 import TopNavbar from "../components/TopNavbar.jsx";
 import ProjectDetailPanel from "../components/ProjectDetailPanel.jsx";
 import { checkHealth } from "../services/api.js";
+import { ProfileProvider, useProfile } from "../context/ProfileContext.jsx";
+import { ThemeProvider } from "../context/ThemeContext.jsx";
 
-export default function MainLayout() {
+function MainLayoutInner() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [apiOnline, setApiOnline] = useState(false);
   const [detailProjectId, setDetailProjectId] = useState(null);
@@ -37,6 +39,8 @@ export default function MainLayout() {
 
   const closeProject = useCallback(() => setDetailProjectId(null), []);
 
+  const { profile, initials } = useProfile();
+
   return (
     <div className="app-shell">
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
@@ -45,6 +49,9 @@ export default function MainLayout() {
           apiOnline={apiOnline}
           onMenuClick={() => setSidebarOpen((open) => !open)}
           onOpenProject={openProject}
+          userName={profile.name}
+          userRole={profile.role}
+          userInitials={initials}
         />
         <main className="page-content">
           <Outlet context={{ apiOnline, refreshHealth, openProject }} />
@@ -58,5 +65,15 @@ export default function MainLayout() {
       </div>
       <ProjectDetailPanel projectId={detailProjectId} onClose={closeProject} />
     </div>
+  );
+}
+
+export default function MainLayout() {
+  return (
+    <ThemeProvider>
+      <ProfileProvider>
+        <MainLayoutInner />
+      </ProfileProvider>
+    </ThemeProvider>
   );
 }

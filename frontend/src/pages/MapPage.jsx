@@ -14,6 +14,8 @@ export default function MapPage() {
 
   useEffect(() => {
     document.title = "Map · LADI Portal";
+    // Expose projects to MapPanel for highest-risk project lookup
+    window.__LADI_PROJECTS__ = allProjects;
   }, []);
 
   const selectedProject = useMemo(() => {
@@ -28,7 +30,7 @@ export default function MapPage() {
     <>
       <PageHeader
         title="Geographic Risk View"
-        subtitle="Select a marker to inspect the most at-risk monitored project in that state."
+        subtitle="Select a state on the map to inspect the most at-risk monitored project in that state."
       >
         <span className="module-tag">Phase 2 Module</span>
       </PageHeader>
@@ -113,11 +115,11 @@ export default function MapPage() {
         <span className="placeholder-icon" aria-hidden="true">
           <MapIcon size={24} />
         </span>
-        <h3>Interactive GIS layer planned for Phase 3</h3>
+        <h3>Interactive GIS layer with parcel boundaries planned for future phases</h3>
         <p>
           District-level choropleth mapping with parcel boundaries will be
           integrated once the geospatial pipeline is available. The current
-          panel uses a stylised vector representation with mock aggregates.
+          panel uses actual India state boundaries from GeoJSON with mock risk data.
         </p>
       </div>
     </>

@@ -70,3 +70,12 @@ export async function getAlerts({ signal } = {}) {
 export async function getAnalytics({ signal } = {}) {
   return getJson("/api/analytics", { signal });
 }
+
+export async function getDashboardData({ signal } = {}) {
+  const [projects, alerts, analytics] = await Promise.all([
+    getProjects({ signal }),
+    getAlerts({ signal }),
+    getAnalytics({ signal }),
+  ]);
+  return { projects, alerts, analytics };
+}
