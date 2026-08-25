@@ -2079,6 +2079,11 @@ button {
   gap: 12px;
 }
 
+/* Ensure GeoJSON state polygons have visible fill */
+.map-canvas .leaflet-overlay-pane path {
+  fill-opacity: 1;
+}
+
 .map-svg {
   width: 100%;
   height: auto;
