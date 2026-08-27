@@ -1,13 +1,14 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { X, MapPin, CalendarClock, Stethoscope } from "lucide-react";
+import { X, MapPin, Stethoscope, AlertTriangle, Eye, CheckCircle } from "lucide-react";
 import RiskBadge from "./RiskBadge.jsx";
-import { getProjectById, formatTimestamp, riskColor } from "../utils/projectUtils.js";
+import { getProjectById, formatTimestamp } from "../utils/projectUtils.js";
 import {
   predictProject,
   getRiskLevel,
   getRiskDrivers,
   getRecommendedAction,
+  RISK_FACTOR_LABELS,
 } from "../utils/riskEngine.js";
 
 export default function ProjectDetailPanel({ projectId, onClose }) {
@@ -57,6 +58,29 @@ export default function ProjectDetailPanel({ projectId, onClose }) {
   const drivers = getRiskDrivers(project);
   const primaryFactor = drivers.length > 0 ? drivers[0].key : null;
 
+  // Determine action priority based on risk level
+  const actionPriority = useMemo(() => {
+    switch (predicted.riskLevel) {
+      case "Critical": return { label: "IMMEDIATE ACTION REQUIRED", level: "critical", icon: AlertTriangle };
+      case "High": return { label: "HIGH PRIORITY", level: "high", icon: AlertTriangle };
+      case "Medium": return { label: "MONITOR", level: "medium", icon: Eye };
+      case "Low": return { label: "ON TRACK", level: "low", icon: CheckCircle };
+      default: return { label: "ON TRACK", level: "low", icon: CheckCircle };
+    }
+  }, [predicted.riskLevel]);
+
+  // Get factor progress data for visual progress bars
+  const factorProgress = useMemo(() => {
+    return drivers.map((d) => ({
+      ...d,
+      progressPercent: Math.min(100, Math.round((d.contribution / predicted.predictedDelayRisk) * 100)) || 0,
+      severityLevel: d.severity.toLowerCase(),
+    }));
+  }, [drivers, predicted.predictedDelayRisk]);
+
+  // Format risk level for CSS class
+  const riskLevelClass = predicted.riskLevel.toLowerCase();
+
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div
@@ -89,74 +113,109 @@ export default function ProjectDetailPanel({ projectId, onClose }) {
         </div>
 
         <div className="modal-body">
-          <div className="detail-grid">
-            <div className="detail-cell">
-              <span className="stat-tile-label">Predicted Delay Risk</span>
-              <span
-                className="detail-big"
-                style={{ color: riskColor(predicted.predictedDelayRisk) }}
-              >
+          {/* Risk Summary */}
+          <h3 className="modal-section-title">Risk Summary</h3>
+          <div className="risk-summary">
+            <div className="risk-summary-item">
+              <span className="risk-summary-label">Predicted Delay Risk</span>
+              <span className={`risk-summary-value ${riskLevelClass}`}>
                 {predicted.predictedDelayRisk}%
               </span>
             </div>
-            <div className="detail-cell">
-              <span className="stat-tile-label">Risk Level</span>
-              <span className="detail-big" style={{ color: riskColor(predicted.riskLevel) }}>
+            <div className="risk-summary-item">
+              <span className="risk-summary-label">Risk Level</span>
+              <span className={`risk-summary-value ${riskLevelClass}`}>
                 {predicted.riskLevel}
               </span>
             </div>
-            <div className="detail-cell">
-              <span className="stat-tile-label">Expected Delay</span>
-              <span className="detail-mid">
+            <div className="risk-summary-item">
+              <span className="risk-summary-label">Expected Delay</span>
+              <span className="risk-summary-value">
                 {predicted.expectedDelayDays} days
               </span>
             </div>
-            <div className="detail-cell">
-              <span className="stat-tile-label">Model Confidence</span>
-              <span className="detail-mid">{predicted.confidence}%</span>
-            </div>
-          </div>
-
-          <h3 className="modal-section-title">Primary Driver</h3>
-          {primaryFactor && (
-            <div className="detail-cell">
-              <span
-                className={`risk-badge risk-${primaryFactor === "landownerObjections" ? "high" : "low"}`}
-              >
-                <span className="risk-dot" aria-hidden="true" />
-                {primaryFactor}
+            <div className="risk-summary-item">
+              <span className="risk-summary-label">Model Confidence</span>
+              <span className="risk-summary-value">
+                {predicted.confidence}%
               </span>
             </div>
-          )}
-
-          <h3 className="modal-section-title">Risk Drivers</h3>
-          <ul className="factor-list">
-            {drivers.map((d, i) => (
-              <li key={i}>
-                <span
-                  className="risk-dot"
-                  style={{ background: riskColor(d.severity) }}
-                  aria-hidden="true"
-                />
-                <span>{d.label}: +{d.contribution}pt</span>
-              </li>
-            ))}
-          </ul>
-
-          <h3 className="modal-section-title">Why is this project at risk?</h3>
-          <div className="callout">
-            <Stethoscope size={16} aria-hidden="true" />
-            <p>
-              {drivers.length > 0
-                ? drivers[0].explanation
-                : "No significant risk factors identified."}
-            </p>
           </div>
 
+          {/* Action Priority */}
+          <h3 className="modal-section-title">Action Priority</h3>
+          <div className={`action-priority ${actionPriority.level}`}>
+            <actionPriority.icon size={14} aria-hidden="true" />
+            {actionPriority.label}
+          </div>
+
+          {/* Why Is This Project At Risk? */}
+          <h3 className="modal-section-title">Why Is This Project At Risk?</h3>
+          <div className="factor-analysis">
+            <div className="factor-analysis-title">Risk Factor Breakdown</div>
+            {factorProgress.length > 0 ? (
+              factorProgress.map((factor, index) => (
+                <div className="factor-row" key={index}>
+                  <div className="factor-row-header">
+                    <span className="factor-name">{factor.label}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span className="factor-value">{factor.level}%</span>
+                      <span className={`factor-severity ${factor.severityLevel}`}>
+                        {factor.severity}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="factor-progress">
+                    <div
+                      className={`factor-progress-fill ${factor.severityLevel}`}
+                      style={{ width: `${factor.progressPercent}%` }}
+                    />
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="factor-row">
+                <span style={{ color: "var(--muted)" }}>No significant risk factors identified.</span>
+              </div>
+            )}
+          </div>
+
+          {/* Primary Risk Driver */}
+          <h3 className="modal-section-title">Primary Risk Driver</h3>
+          {primaryFactor ? (
+            <div className="primary-driver-card">
+              <div className="primary-driver-header">
+                <div>
+                  <span className="primary-driver-name">
+                    {RISK_FACTOR_LABELS[primaryFactor] || primaryFactor}
+                  </span>
+                  <div style={{ marginTop: 4 }}>
+                    <span className="primary-driver-value">
+                      {project[primaryFactor] || 0}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="primary-driver-explanation">
+                {drivers[0]?.explanation || "No explanation available."}
+              </div>
+            </div>
+) : (
+              <div className="primary-driver-card">
+                <p style={{ color: "var(--muted)" }}>No significant risk driver identified.</p>
+              </div>
+            )}
+
+          {/* Recommended Action */}
           <h3 className="modal-section-title">Recommended Action</h3>
-          <div className="callout">
-            <Stethoscope size={16} aria-hidden="true" />
-            <p>{predicted.recommendedAction}</p>
+          <div className="recommended-action-card">
+            <div className="recommended-action-header">
+              <Stethoscope className="recommended-action-icon" size={16} aria-hidden="true" />
+              <span className="recommended-action-title">Recommended Action</span>
+            </div>
+            <p className="recommended-action-text">
+              {predicted.recommendedAction || "No recommendation available."}
+            </p>
           </div>
         </div>
 

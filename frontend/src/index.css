@@ -2060,6 +2060,241 @@ button {
   border-top: 1px solid var(--border);
 }
 
+/* Executive Risk Intelligence - Project Detail Panel enhancements */
+.risk-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.risk-summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.risk-summary-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--faint);
+}
+
+.risk-summary-value {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  line-height: 1.1;
+}
+
+.risk-summary-value.critical { color: var(--red); }
+.risk-summary-value.high { color: var(--orange); }
+.risk-summary-value.medium { color: var(--amber); }
+.risk-summary-value.low { color: var(--green); }
+
+.factor-analysis {
+  margin-bottom: 16px;
+}
+
+.factor-analysis-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin: 18px 0 10px;
+}
+
+.factor-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.factor-row-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.factor-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.factor-value {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--navy);
+  font-variant-numeric: tabular-nums;
+}
+
+.factor-severity {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.factor-severity.high {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.factor-severity.medium {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.factor-severity.low {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.factor-progress {
+  height: 6px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.factor-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.factor-progress-fill.critical { background: var(--red); }
+.factor-progress-fill.high { background: var(--orange); }
+.factor-progress-fill.medium { background: var(--amber); }
+.factor-progress-fill.low { background: var(--green); }
+
+.primary-driver-card {
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  border-left: 4px solid var(--primary);
+}
+
+.primary-driver-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.primary-driver-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.primary-driver-value {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--navy);
+  font-variant-numeric: tabular-nums;
+}
+
+.primary-driver-explanation {
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.recommended-action-card {
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  background: var(--primary-soft);
+  border: 1px solid var(--primary-border);
+  border-radius: 10px;
+}
+
+.recommended-action-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.recommended-action-icon {
+  flex-shrink: 0;
+  color: var(--primary);
+}
+
+.recommended-action-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--primary-dark);
+}
+
+.recommended-action-text {
+  font-size: 13px;
+  color: var(--primary-dark);
+  line-height: 1.55;
+}
+
+.action-priority {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.action-priority.critical {
+  background: var(--red-soft);
+  color: var(--red);
+  border: 1px solid var(--red-border);
+}
+
+.action-priority.high {
+  background: var(--orange-soft);
+  color: var(--orange);
+  border: 1px solid var(--orange-border);
+}
+
+.action-priority.medium {
+  background: var(--amber-soft);
+  color: var(--amber);
+  border: 1px solid var(--amber-border);
+}
+
+.action-priority.low {
+  background: var(--green-soft);
+  color: var(--green);
+  border: 1px solid var(--green-border);
+}
+
+.action-priority-icon {
+  flex-shrink: 0;
+}
+
 /* Map panel */
 .map-layout {
   display: grid;
@@ -2116,6 +2351,32 @@ button {
   gap: 8px 20px;
   padding-top: 12px;
   border-top: 1px solid var(--border);
+}
+
+/* State name labels (permanent tooltips) */
+.state-label-tooltip {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(16, 41, 75, 0.15) !important;
+  border-radius: 4px !important;
+  box-shadow: 0 2px 8px rgba(16, 41, 75, 0.12) !important;
+  padding: 3px 8px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: var(--navy) !important;
+  white-space: nowrap !important;
+  pointer-events: none !important;
+  z-index: 600 !important;
+}
+
+.state-label-tooltip::before {
+  display: none !important;
+}
+
+[data-theme="dark"] .state-label-tooltip {
+  background: rgba(30, 41, 59, 0.95) !important;
+  border-color: rgba(148, 163, 184, 0.2) !important;
+  color: var(--text) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
 }
 
 .map-side {

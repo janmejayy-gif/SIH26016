@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from "react";
-import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, GeoJSON, useMap, Tooltip } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { stateSummary } from "../data/dashboardData.js";
 import { riskColor } from "../utils/projectUtils.js";
@@ -52,6 +52,14 @@ function StateLayer({ geojson, selectedState, onStateClick, riskData }) {
         const layer = e.target;
         layer.setStyle(style(feature));
       },
+    });
+    // Bind permanent tooltip with state name
+    layer.bindTooltip(stateName, {
+      permanent: true,
+      direction: "center",
+      className: "state-label-tooltip",
+      offset: [0, 0],
+      sticky: true,
     });
   };
 
