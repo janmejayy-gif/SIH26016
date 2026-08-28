@@ -14,6 +14,7 @@ import {
 export default function ProjectDetailPanel({ projectId, onClose }) {
   const project = getProjectById(projectId);
 
+  // All hooks MUST run unconditionally before any early return
   useEffect(() => {
     if (!projectId) return undefined;
     const onKey = (e) => {
@@ -27,6 +28,39 @@ export default function ProjectDetailPanel({ projectId, onClose }) {
     };
   }, [projectId, onClose]);
 
+  const predicted = useMemo(() => (project ? predictProject(project) : null), [project]);
+  const drivers = useMemo(() => (project ? getRiskDrivers(project) : []), [project]);
+  const primaryFactor = useMemo(() => (drivers.length > 0 ? drivers[0].key : null), [drivers]);
+
+  // Determine action priority based on risk level
+  const actionPriority = useMemo(() => {
+    if (!predicted) return { label: "ON TRACK", level: "low", icon: CheckCircle };
+    switch (predicted.riskLevel) {
+      case "Critical": return { label: "IMMEDIATE ACTION REQUIRED", level: "critical", icon: AlertTriangle };
+      case "High": return { label: "HIGH PRIORITY", level: "high", icon: AlertTriangle };
+      case "Medium": return { label: "MONITOR", level: "medium", icon: Eye };
+      case "Low": return { label: "ON TRACK", level: "low", icon: CheckCircle };
+      default: return { label: "ON TRACK", level: "low", icon: CheckCircle };
+    }
+  }, [predicted]);
+
+  // Get factor progress data for visual progress bars
+  const factorProgress = useMemo(() => {
+    if (!predicted || !predicted.predictedDelayRisk || predicted.predictedDelayRisk === 0) {
+      return drivers.map((d) => ({
+        ...d,
+        progressPercent: 0,
+        severityLevel: d.severity.toLowerCase(),
+      }));
+    }
+    return drivers.map((d) => ({
+      ...d,
+      progressPercent: Math.min(100, Math.round((d.contribution / predicted.predictedDelayRisk) * 100)) || 0,
+      severityLevel: d.severity.toLowerCase(),
+    }));
+  }, [drivers, predicted]);
+
+  // Early returns AFTER all hooks
   if (!projectId) return null;
 
   if (!project) {
@@ -54,32 +88,11 @@ export default function ProjectDetailPanel({ projectId, onClose }) {
     );
   }
 
-  const predicted = predictProject(project);
-  const drivers = getRiskDrivers(project);
-  const primaryFactor = drivers.length > 0 ? drivers[0].key : null;
-
-  // Determine action priority based on risk level
-  const actionPriority = useMemo(() => {
-    switch (predicted.riskLevel) {
-      case "Critical": return { label: "IMMEDIATE ACTION REQUIRED", level: "critical", icon: AlertTriangle };
-      case "High": return { label: "HIGH PRIORITY", level: "high", icon: AlertTriangle };
-      case "Medium": return { label: "MONITOR", level: "medium", icon: Eye };
-      case "Low": return { label: "ON TRACK", level: "low", icon: CheckCircle };
-      default: return { label: "ON TRACK", level: "low", icon: CheckCircle };
-    }
-  }, [predicted.riskLevel]);
-
-  // Get factor progress data for visual progress bars
-  const factorProgress = useMemo(() => {
-    return drivers.map((d) => ({
-      ...d,
-      progressPercent: Math.min(100, Math.round((d.contribution / predicted.predictedDelayRisk) * 100)) || 0,
-      severityLevel: d.severity.toLowerCase(),
-    }));
-  }, [drivers, predicted.predictedDelayRisk]);
-
   // Format risk level for CSS class
   const riskLevelClass = predicted.riskLevel.toLowerCase();
+
+  // Extract icon component for proper JSX rendering
+  const ActionIcon = actionPriority.icon;
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -145,7 +158,7 @@ export default function ProjectDetailPanel({ projectId, onClose }) {
           {/* Action Priority */}
           <h3 className="modal-section-title">Action Priority</h3>
           <div className={`action-priority ${actionPriority.level}`}>
-            <actionPriority.icon size={14} aria-hidden="true" />
+            <ActionIcon size={14} aria-hidden="true" />
             {actionPriority.label}
           </div>
 
@@ -197,7 +210,11 @@ export default function ProjectDetailPanel({ projectId, onClose }) {
                 </div>
               </div>
               <div className="primary-driver-explanation">
-                {drivers[0]?.explanation || "No explanation available."}
+                {(() => {
+                  const primaryDriver = drivers[0];
+                  if (!primaryDriver) return "No explanation available.";
+                  return `${primaryDriver.label} (${primaryDriver.level}%) contributes ${primaryDriver.contribution} points to the overall risk score of ${predicted.predictedDelayRisk}%, making it the primary driver.`;
+                })()}
               </div>
             </div>
 ) : (
