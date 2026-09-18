@@ -53,6 +53,34 @@ async function getJson(path, { signal } = {}) {
   return response.json();
 }
 
+async function postJson(path, body, { signal } = {}) {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(body),
+    signal,
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.error || `POST ${path} failed with status ${response.status}`);
+  }
+  return response.json();
+}
+
+async function putJson(path, body, { signal } = {}) {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(body),
+    signal,
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.error || `PUT ${path} failed with status ${response.status}`);
+  }
+  return response.json();
+}
+
 export async function getProjects({ signal } = {}) {
   const data = await getJson("/api/projects", { signal });
   return Array.isArray(data) ? data : data.projects || [];
@@ -78,4 +106,64 @@ export async function getDashboardData({ signal } = {}) {
     getAnalytics({ signal }),
   ]);
   return { projects, alerts, analytics };
+}
+
+// Proposal API functions
+export async function getProposals(params = {}, { signal } = {}) {
+  const query = new URLSearchParams(params).toString();
+  const path = `/api/proposals${query ? `?${query}` : ""}`;
+  const data = await getJson(path, { signal });
+  return Array.isArray(data) ? data : data.proposals || [];
+}
+
+export async function getProposal(id, { signal } = {}) {
+  return getJson(`/api/proposals/${encodeURIComponent(id)}`, { signal });
+}
+
+export async function createProposal(proposalData, { signal } = {}) {
+  return postJson("/api/proposals", proposalData, { signal });
+}
+
+export async function updateProposal(id, proposalData, { signal } = {}) {
+  return putJson(`/api/proposals/${encodeURIComponent(id)}`, proposalData, { signal });
+}
+
+export async function submitProposal(id, { signal } = {}) {
+  return postJson(`/api/proposals/${encodeURIComponent(id)}/submit`, {}, { signal });
+}
+
+export async function approveProposal(id, approvalData, { signal } = {}) {
+  return postJson(`/api/proposals/${encodeURIComponent(id)}/approve`, approvalData, { signal });
+}
+
+export async function rejectProposal(id, rejectionData, { signal } = {}) {
+  return postJson(`/api/proposals/${encodeURIComponent(id)}/reject`, rejectionData, { signal });
+}
+
+export async function sendBackProposal(id, sendBackData, { signal } = {}) {
+  return postJson(`/api/proposals/${encodeURIComponent(id)}/send-back`, sendBackData, { signal });
+}
+
+export async function resubmitProposal(id, { signal } = {}) {
+  return postJson(`/api/proposals/${encodeURIComponent(id)}/resubmit`, {}, { signal });
+}
+
+export async function updateProposalClassification(id, classificationData, { signal } = {}) {
+  return putJson(`/api/proposals/${encodeURIComponent(id)}/classification`, classificationData, { signal });
+}
+
+export async function updateProposalHierarchy(id, hierarchyData, { signal } = {}) {
+  return putJson(`/api/proposals/${encodeURIComponent(id)}/hierarchy`, hierarchyData, { signal });
+}
+
+export async function approveAuthorityLevel(id, approvalData, { signal } = {}) {
+  return postJson(`/api/proposals/${encodeURIComponent(id)}/approve`, approvalData, { signal });
+}
+
+export async function rejectAuthorityLevel(id, rejectionData, { signal } = {}) {
+  return postJson(`/api/proposals/${encodeURIComponent(id)}/reject`, rejectionData, { signal });
+}
+
+export async function sendBackAuthorityLevel(id, sendBackData, { signal } = {}) {
+  return postJson(`/api/proposals/${encodeURIComponent(id)}/send-back`, sendBackData, { signal });
 }

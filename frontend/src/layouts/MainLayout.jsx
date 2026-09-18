@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar.jsx";
 import TopNavbar from "../components/TopNavbar.jsx";
@@ -6,12 +6,15 @@ import ProjectDetailPanel from "../components/ProjectDetailPanel.jsx";
 import { checkHealth } from "../services/api.js";
 import { ProfileProvider, useProfile } from "../context/ProfileContext.jsx";
 import { ThemeProvider } from "../context/ThemeContext.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
 
 function MainLayoutInner() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [apiOnline, setApiOnline] = useState(false);
   const [detailProjectId, setDetailProjectId] = useState(null);
   const location = useLocation();
+  const { user } = useAuth();
+  const { profile, initials: profileInitials } = useProfile();
 
   const refreshHealth = useCallback(async () => {
     try {
@@ -39,7 +42,25 @@ function MainLayoutInner() {
 
   const closeProject = useCallback(() => setDetailProjectId(null), []);
 
-  const { profile, initials } = useProfile();
+  const displayName = useMemo(() => {
+    if (user?.displayName) return user.displayName;
+    if (profile?.name) return profile.name;
+    return "User";
+  }, [user?.displayName, profile?.name]);
+
+  const displayInitials = useMemo(() => {
+    if (user?.displayName) {
+      return user.displayName
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
+    }
+    return profileInitials;
+  }, [user?.displayName, profileInitials]);
+
+  const userPhotoURL = user?.photoURL || null;
 
   return (
     <div className="app-shell">
@@ -49,9 +70,10 @@ function MainLayoutInner() {
           apiOnline={apiOnline}
           onMenuClick={() => setSidebarOpen((open) => !open)}
           onOpenProject={openProject}
-          userName={profile.name}
+          userName={displayName}
           userRole={profile.role}
-          userInitials={initials}
+          userInitials={displayInitials}
+          userPhotoURL={userPhotoURL}
         />
         <main className="page-content">
           <Outlet context={{ apiOnline, refreshHealth, openProject }} />
@@ -69,9 +91,10 @@ function MainLayoutInner() {
 }
 
 export default function MainLayout() {
+  const { user } = useAuth();
   return (
     <ThemeProvider>
-      <ProfileProvider>
+      <ProfileProvider firebaseUser={user}>
         <MainLayoutInner />
       </ProfileProvider>
     </ThemeProvider>

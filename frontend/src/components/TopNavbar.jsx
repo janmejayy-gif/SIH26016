@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
-import { Bell, ChevronRight, Menu, Search, X } from "lucide-react";
+import { useMemo, useState, useRef, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Bell, ChevronRight, Menu, Search, X, LogOut, User, Settings } from "lucide-react";
 import RiskBadge from "./RiskBadge.jsx";
 import NotificationDropdown from "./NotificationDropdown.jsx";
 import { searchProjects } from "../utils/projectUtils.js";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const ROUTE_LABELS = {
   "/dashboard": "Dashboard",
@@ -15,11 +16,15 @@ const ROUTE_LABELS = {
   "/settings": "Settings",
 };
 
-export default function TopNavbar({ apiOnline, onMenuClick, onOpenProject, userName, userRole, userInitials }) {
+export default function TopNavbar({ apiOnline, onMenuClick, onOpenProject, userName, userRole, userInitials, userPhotoURL }) {
   const { pathname } = useLocation();
   const currentLabel = ROUTE_LABELS[pathname] || "Dashboard";
   const [query, setQuery] = useState("");
   const [focused, setFocused] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
+  const navigate = useNavigate();
+  const { logout, user } = useAuth();
 
   const results = useMemo(() => searchProjects(query).slice(0, 6), [query]);
   const showDropdown = focused && query.trim().length > 0;
@@ -29,6 +34,26 @@ export default function TopNavbar({ apiOnline, onMenuClick, onOpenProject, userN
     setFocused(false);
     if (onOpenProject) onOpenProject(id);
   };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/login", { replace: true });
+    } catch {
+      // Error handled in AuthContext
+    }
+    setUserMenuOpen(false);
+  };
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setUserMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <header className="topnavbar">
@@ -105,12 +130,59 @@ export default function TopNavbar({ apiOnline, onMenuClick, onOpenProject, userN
 
         <NotificationDropdown onOpenProject={onOpenProject} />
 
-        <div className="user-chip">
-          <div className="avatar">{userInitials}</div>
-          <div className="user-meta">
-            <div className="user-name">{userName}</div>
-            <div className="user-role">{userRole}</div>
-          </div>
+        <div className="user-chip-wrapper" ref={userMenuRef}>
+          <button
+            className="user-chip"
+            onClick={() => setUserMenuOpen(!userMenuOpen)}
+            aria-expanded={userMenuOpen}
+            aria-haspopup="true"
+            aria-label="User menu"
+          >
+            {userPhotoURL ? (
+              <img
+                className="avatar avatar-img"
+                src={userPhotoURL}
+                alt=""
+                aria-hidden="true"
+              />
+            ) : (
+              <div className="avatar">{userInitials}</div>
+            )}
+            <div className="user-meta">
+              <div className="user-name">{userName}</div>
+              <div className="user-role">{userRole}</div>
+            </div>
+          </button>
+
+          {userMenuOpen && (
+            <div className="user-dropdown card" role="menu">
+              <div className="user-dropdown-header">
+                {userPhotoURL ? (
+                  <img className="user-dropdown-avatar" src={userPhotoURL} alt="" aria-hidden="true" />
+                ) : (
+                  <div className="user-dropdown-avatar placeholder">{userInitials}</div>
+                )}
+                <div>
+                  <div className="user-dropdown-name">{userName}</div>
+                  <div className="user-dropdown-email">{user?.email || ""}</div>
+                </div>
+              </div>
+              <div className="user-dropdown-divider" />
+              <button className="user-dropdown-item" role="menuitem" onClick={() => navigate("/settings")}>
+                <Settings size={15} aria-hidden="true" />
+                <span>Settings</span>
+              </button>
+              <button className="user-dropdown-item" role="menuitem" onClick={() => navigate("/profile")}>
+                <User size={15} aria-hidden="true" />
+                <span>Profile</span>
+              </button>
+              <div className="user-dropdown-divider" />
+              <button className="user-dropdown-item logout" role="menuitem" onClick={handleLogout}>
+                <LogOut size={15} aria-hidden="true" />
+                <span>Sign out</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react";
 
 const ProfileContext = createContext(null);
 
@@ -17,17 +17,30 @@ function getInitials(name) {
     .slice(0, 2);
 }
 
-export function ProfileProvider({ children }) {
+function getDefaultsFromFirebase(firebaseUser) {
+  if (!firebaseUser) return DEFAULT_PROFILE;
+  return {
+    name: firebaseUser.displayName || DEFAULT_PROFILE.name,
+    email: firebaseUser.email || "",
+    photoURL: firebaseUser.photoURL || null,
+    role: DEFAULT_PROFILE.role,
+    department: DEFAULT_PROFILE.department,
+  };
+}
+
+export function ProfileProvider({ children, firebaseUser }) {
+  const defaults = useMemo(() => getDefaultsFromFirebase(firebaseUser), [firebaseUser]);
+
   const [profile, setProfile] = useState(() => {
     try {
       const stored = localStorage.getItem("ladi-profile");
       if (stored) {
-        return { ...DEFAULT_PROFILE, ...JSON.parse(stored) };
+        return { ...defaults, ...JSON.parse(stored) };
       }
     } catch {
       // ignore parse errors
     }
-    return DEFAULT_PROFILE;
+    return defaults;
   });
 
   const [saveMessage, setSaveMessage] = useState(null);
@@ -42,12 +55,12 @@ export function ProfileProvider({ children }) {
     setTimeout(() => setSaveMessage(null), 3000);
   }, []);
 
-  const value = {
+  const value = useMemo(() => ({
     profile,
     updateProfile,
     saveMessage,
     initials: getInitials(profile.name),
-  };
+  }), [profile, saveMessage]);
 
   return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;
 }

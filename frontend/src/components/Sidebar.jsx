@@ -7,6 +7,7 @@ import {
   Bell,
   BarChart3,
   Settings,
+  FileText,
 } from "lucide-react";
 
 const NAV_SECTIONS = [
@@ -14,6 +15,7 @@ const NAV_SECTIONS = [
     label: "Monitor",
     items: [
       { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { to: "/proposals", label: "Proposals", icon: FileText },
       { to: "/projects", label: "Projects", icon: FolderKanban },
       { to: "/risk-analysis", label: "Risk Analysis", icon: ShieldAlert },
       { to: "/map", label: "Map", icon: Map },
